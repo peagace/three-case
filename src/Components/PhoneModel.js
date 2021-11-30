@@ -3,7 +3,6 @@ import { useRef, useState } from 'react'
 import { useGLTF, Html, useTexture, } from '@react-three/drei'
 import { useFrame, useThree  } from '@react-three/fiber';
 
-
 function Marker({ children, ...props }) {
   // This holds the visible state
   const [hidden, set] = useState()
@@ -25,25 +24,43 @@ function Marker({ children, ...props }) {
 
 export default function Model(props) {
 
-  const { nodes } = useGLTF('/phonecase.gltf')  
-  var [texture, texture2] = useTexture(['/CasePhone.png', '/CasePhone2.png'])
-  texture.flipY = false;
-  texture2.flipY = false;
-
-  var radioTexture = texture
-  console.log(radioTexture)
-  
   const group = useRef()
-  const { mouse } = useThree()  
 
-  function ChangeTopic(){
-    console.log('trocou')
-    radioTexture = null
-    radioTexture = texture2
-    console.log(radioTexture)
+  //GLT loader
+  const { nodes } = useGLTF('/phonecase.gltf')  
+
+  //Texturas
+  const [home, gamification, ranking, quizz, store] = useTexture(['/default.png', '/gamification.png', '/ranking.png', '/quizz.png', '/store.png'])
+  const [activeTexture, SetActiveTexture] = useState(home)
+  home.flipY = false;
+  gamification.flipY = false;  
+  ranking.flipY = false;  
+  quizz.flipY = false;  
+  store.flipY = false; 
+
+  function SetDefault(){
+    SetActiveTexture(home) 
+  }
+
+  function SetGamification(){
+    SetActiveTexture(gamification) 
+  }
+
+  function SetRanking(){
+    SetActiveTexture(ranking) 
+  }
+
+  function SetQuizz(){
+    SetActiveTexture(quizz) 
+  }
+
+  function SetStore(){
+    SetActiveTexture(store) 
   }
 
   //Look at parallax - Duro
+  //const { mouse } = useThree() 
+
   // useFrame(() => {
   //   group.current.rotation.x = Math.sin(mouse.y * -0.3)
   //   group.current.rotation.y = Math.sin(mouse.x * 0.3)
@@ -71,28 +88,28 @@ export default function Model(props) {
           <meshStandardMaterial attach='material' color='#111115' roughness={0.45} metalness={1} opacity={0.7} envMapIntensity={1}/>
           <Marker position={[-3, 1, 0.4]}>
             {/* Anything in here is regular HTML, these markers are from font-awesome */}
-            <button className="pin-style" onClick={() => ChangeTopic()}>
+            <button className="pin-style" onClick={() => SetGamification()}>
               Gamificação
             </button>
           </Marker>
           <Marker position={[2.5, 0, 0.4]} >
-            <button className="pin-style">
+            <button className="pin-style" onClick={() => SetRanking()}>
               Ranking
             </button>
           </Marker>
-          <Marker position={[-1, -4.2, 0.4]}>
-            <button className="pin-style">
+          <Marker position={[-0.5, -4.3, 0.4]}>
+            <button className="pin-style" onClick={() => SetQuizz()}>
               Quizz
             </button>
           </Marker>
           <Marker position={[2, -4.2, 0.4]}>
-            <button className="pin-style">
+            <button className="pin-style" onClick={() => SetStore()}>
               Loja
             </button>
           </Marker>
         </mesh>
         <mesh geometry={nodes.tela.geometry}>
-          <meshStandardMaterial attach='material' map={radioTexture} roughness={0.3} metalness={0.2} envMapIntensity={0.2} needsUpdate={true}/>
+          <meshStandardMaterial attach='material' map={activeTexture} roughness={0.3} metalness={0.2} envMapIntensity={0.2}/>
         </mesh>
 
         {/* Vidro, ficou ruim */}
