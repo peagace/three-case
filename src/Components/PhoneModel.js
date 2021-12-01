@@ -1,93 +1,90 @@
 import * as THREE from 'three'
-import { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { useGLTF, Html, useTexture, } from '@react-three/drei'
-import { useFrame, useThree  } from '@react-three/fiber';
+import { a, useSpring, animated, config } from '@react-spring/three'
 
-function Marker({ children, ...props }) {
-  // This holds the visible state
-  const [hidden, set] = useState()
-  
-  return (
-    <Html
-      transform
-      occlude
-      // The <Html> component can tell us when something is occluded (or not)
-      onOcclude={set}
-      // We just interpolate the visible state into css opacity and transforms
-      style={{ transition: 'all 0.2s', opacity: hidden ? 0 : 1, transform: `scale(${hidden ? 0.25 : 1})` }}
-      {...props}
-      >
-      {children}
-    </Html>
-  )
-}
+import BouncyControls from '../Components/Controls'
 
 export default function Model(props) {
 
-  const group = useRef()
+  //GLTF LOADER___________________________________________
+  const { nodes } = useGLTF('/phonecase.gltf')
 
-  //GLT loader
-  const { nodes } = useGLTF('/phonecase.gltf')  
+  //FLIP ANIMATION___________________________________________
+  function FlippingPhone() {
+    const myMesh = React.useRef();
+    const [flip, setFlip] = useState(false);
 
-  //Texturas
-  const [home, gamification, ranking, quizz, store] = useTexture(['/default.png', '/gamification.png', '/ranking.png', '/quizz.png', '/store.png'])
-  const [activeTexture, SetActiveTexture] = useState(home)
-  home.flipY = false;
-  gamification.flipY = false;  
-  ranking.flipY = false;  
-  quizz.flipY = false;  
-  store.flipY = false; 
+    const { rotation } = useSpring({
+      rotation: flip ? [0, Math.PI * 2, 0] : [0, 0, 0],
+      config: config.slow
+    });
 
-  function SetDefault(){
-    SetActiveTexture(home) 
-  }
+    //HTML MARKERS___________________________________________
+    const [hidden, setMarker] = useState()
 
-  function SetGamification(){
-    SetActiveTexture(gamification) 
-  }
+    function Marker({ children, ...props }) {
+      return (
+        <Html
+          transform
+          occlude
+          zIndexRange={[0]}
+          onOcclude={setMarker}
+          style={{ transition: 'all 0.2s', opacity: hidden ? 0 : 1, transform: `scale(${hidden ? 0.25 : 1})` }}
+          {...props}
+        >
+          {children}
+        </Html>
+      )
+    }
 
-  function SetRanking(){
-    SetActiveTexture(ranking) 
-  }
+    //TEXTURAS___________________________________________
+    const [home, gamification, ranking, quizz, store] = useTexture(['/default.png', '/gamification.png', '/ranking.png', '/quizz.png', '/store.png'])
+    const [activeTexture, SetActiveTexture] = useState(home)
+    home.flipY = false;
+    gamification.flipY = false;
+    ranking.flipY = false;
+    quizz.flipY = false;
+    store.flipY = false;
 
-  function SetQuizz(){
-    SetActiveTexture(quizz) 
-  }
+    function SetDefault() {
+      SetActiveTexture(home)
+      setFlip(!flip)
+      setMarker(true)
+    }
 
-  function SetStore(){
-    SetActiveTexture(store) 
-  }
+    function SetGamification() {
+      SetActiveTexture(gamification)
+      setFlip(!flip)
+      setMarker(false)
+    }
 
-  //Look at parallax - Duro
-  //const { mouse } = useThree() 
+    function SetRanking() {
+      SetActiveTexture(ranking)
+      setFlip(!flip)
+    }
 
-  // useFrame(() => {
-  //   group.current.rotation.x = Math.sin(mouse.y * -0.3)
-  //   group.current.rotation.y = Math.sin(mouse.x * 0.3)
-  //   })    
-  
-  //Float animation - Opção 1
-  // useFrame((state) => {
-  //   const t = state.clock.getElapsedTime()
-  //   group.current.rotation.set(0.1 + Math.cos(t / 4.5) / 10, Math.sin(t / 4) / 4, 0.3 - (1 + Math.sin(t / 4)) / 8)
-  //   group.current.position.y = (1 + Math.sin(t / 2)) / 10
-  // })
+    function SetQuizz() {
+      SetActiveTexture(quizz)
+      setFlip(!flip)
+    }
 
-  //Float animation - Opção 2
-  // useFrame((state) => {
-  //   const t = state.clock.getElapsedTime()
-  //   group.current.rotation.z = -0.1 - (Math.sin(t / 1.5)) / 20
-  //   group.current.rotation.x = -Math.PI / 20 + Math.cos(t / 2) / 30
-  //   group.current.rotation.y = Math.sin(t / 4) / 4
-  //   group.current.position.y = (1 + Math.sin(t / 1.5)) / 20
-  // })
+    function SetStore() {
+      SetActiveTexture(store)
+      setFlip(!flip)
+    }
 
-  return (
-    <group ref={group} {...props} dispose={null} scale={1} position={0,0,0}>
-        <mesh geometry={nodes.casephone.geometry}>
-          <meshStandardMaterial attach='material' color='#111115' roughness={0.45} metalness={1} opacity={0.7} envMapIntensity={1}/>
+    return (
+      <animated.group ref={myMesh} rotation={rotation}>
+        <animated.mesh geometry={nodes.casephone.geometry}>
+          <meshStandardMaterial attach='material' color='#111115' roughness={0.45} metalness={1} opacity={0.7} envMapIntensity={1} />
+          <mesh geometry={nodes.tela.geometry}>
+            <meshStandardMaterial attach='material' map={activeTexture} roughness={0.2} metalness={0.1} envMapIntensity={0.8} />
+          </mesh>
+          <mesh geometry={nodes.detail.geometry}>
+            <meshStandardMaterial attach='material' color='#111115' />
+          </mesh>
           <Marker position={[-3, 1, 0.4]}>
-            {/* Anything in here is regular HTML, these markers are from font-awesome */}
             <button className="pin-style" onClick={() => SetGamification()}>
               Gamificação
             </button>
@@ -107,20 +104,16 @@ export default function Model(props) {
               Loja
             </button>
           </Marker>
-        </mesh>
-        <mesh geometry={nodes.tela.geometry}>
-          <meshStandardMaterial attach='material' map={activeTexture} roughness={0.3} metalness={0.2} envMapIntensity={0.2}/>
-        </mesh>
+        </animated.mesh>
+      </animated.group>
+    );
+  }
 
-        {/* Vidro, ficou ruim */}
-        {/* <mesh geometry={nodes.vidro.geometry}>
-          <meshStandardMaterial attach='material' color='#373756' roughness={0.3} transparent={true} metalness={0.5} opacity={0.01} envMapIntensity={0.2}/>
-        </mesh> */}
-
-        {/* Detalhe para orientação */}
-        <mesh geometry={nodes.detail.geometry}>
-          <meshStandardMaterial attach='material' color='#111115'/>
-        </mesh> 
+  return (
+    <group  {...props} dispose={null} scale={1} position={[0, 0, 0]}>
+      <BouncyControls>
+        <FlippingPhone />
+      </BouncyControls>
     </group>
   )
 }
