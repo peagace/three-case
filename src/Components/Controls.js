@@ -9,7 +9,7 @@ import { MathUtils } from 'three'
 //Bouncy controlls Spring Animations
 export default function BouncyControls({ children }) {
     const { size, gl } = useThree()
-    const [props, api] = useSpring(() => ({ rotation: [0, 0, 0], config: { mass: 5, friction: 90, precision: 0.0001 } }), [])
+    const [props, api] = useSpring(() => ({ rotation: [0, 0, 0], config: { mass: 4, friction: 40, precision: 0.001 } }), [])
     useDrag(
         ({ movement: [x, y], down }) => {
             y = MathUtils.clamp(y / size.height, -1, 1) * Math.PI

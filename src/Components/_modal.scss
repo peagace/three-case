@@ -1,0 +1,13 @@
+.modal {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    right: 0;
+    top: 0;
+    width: 50vw;
+    height: 100vh;
+    background-color: #1d1d23;
+    color: white;
+}

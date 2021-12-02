@@ -2,9 +2,10 @@ import * as THREE from 'three'
 import { MathUtils } from 'three'
 import React, { useRef, useState, Suspense } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
-import { Stage, Float, Html } from '@react-three/drei'
+import { Stage, Float, Html, Loader } from '@react-three/drei'
 import { a, useSpring } from '@react-spring/three'
 import { useDrag } from '@use-gesture/react'
+import { EffectComposer, Bloom } from '@react-three/postprocessing'
 
 //Images
 import hkpLogo from '../Assets/Images/logo-default.svg'
@@ -13,13 +14,13 @@ import purpleBg from '../Assets/Images/plain-bg-purple.png'
 
 //Components
 import Phone from '../Components/PhoneModel'
+import IntroAnim from '../Components/IntroAnimation'
+import BouncyControls from '../Components/Controls'
+import CameraParallax from '../Components/CameraParallax'
 
 
 export default function Home() {
     const [modal, setModal] = useState(false)
-    const ref = useRef()
-
-    //Bouncy controlls Spring Animations
 
 
     return (
@@ -33,16 +34,21 @@ export default function Home() {
 
             <div className="showoff-container">
                 <img src={purpleBg} className="showoff-bg" />
-                <Canvas colorManagement dpr={1, 2} camera={{ position: [0, 0, 0], fov: 60, far: 2000, }}>
-                    <Suspense fallback={null}>
+                <Suspense fallback={<Loader />}>
+                    <Canvas colorManagement dpr={1, 2} camera={{ position: [0, 0, 0], fov: 60, far: 2000, }}>
                         <Stage contactShadow={false} shadows={false} environment="warehouse" intensity={0.2}>
-                        <directionalLight color="#FF2847" position={[-5, -2.5, -2]} intensity={0.2} castShadow={false} />
-                            <Float speed={2.5} rotationIntensity={1} floatIntensity={3}>
-                                <Phone/>
-                            </Float>                            
+                            <directionalLight color="#FF2847" position={[-5, -2.5, -2]} intensity={0.2} castShadow={false} />
+                            <BouncyControls>
+                                <Float speed={2.5} rotationIntensity={1} floatIntensity={3}>
+                                    <Phone />
+                                </Float>
+                            </BouncyControls>
                         </Stage>
-                    </Suspense>
-                </Canvas>
+                        <EffectComposer multisampling={16}>
+                            <Bloom intensity={0.6} luminanceThreshold={0.8} luminanceSmoothing={0.5} kernelSize={5} />
+                        </EffectComposer>
+                    </Canvas>
+                </Suspense>
             </div>
 
             <div className="case-container">
