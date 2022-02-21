@@ -1,7 +1,10 @@
 import * as THREE from 'three'
-import React, { useEffect, useRef, useState } from 'react'
-import { useGLTF, Html, useTexture, Torus } from '@react-three/drei'
+import React, { useState } from 'react'
+import { useGLTF, Html, useTexture, Torus, Float, Stage, PresentationControls } from '@react-three/drei'
 import { a, useSpring, animated, config } from '@react-spring/three'
+//import { EffectComposer, Bloom } from '@react-three/postprocessing'
+import { Canvas } from '@react-three/fiber'
+
 
 export default function Model(props) {
 
@@ -15,7 +18,7 @@ export default function Model(props) {
 
     const { rotation, position } = useSpring({
       rotation: flip ? [0, Math.PI * 2.1, 0] : [0, 0, 0],
-      position: flip ? [-5,-1,3] : [0,0,0],
+      position: flip ? [-5, -1, 3] : [0, 0, 0],
       config: config.slow
     });
 
@@ -27,7 +30,7 @@ export default function Model(props) {
         <Html
           center
           zIndexRange={[0]}
-          style={{transition: 'all 0.2s', opacity: hidden ? 0.2 : 1,}}
+          style={{ transition: 'all 0.2s', opacity: hidden ? 0.2 : 1, }}
           {...props}
         >
           {children}
@@ -43,18 +46,17 @@ export default function Model(props) {
     function ChangeTexture() {
       setFlip(!flip)
       setMarker(!hidden)
-      console.log(hidden)
     }
 
     return (
       <animated.group ref={myMesh} rotation={rotation} position={position}>
-        <animated.mesh geometry={nodes.casephone.geometry}>
-          <meshStandardMaterial attach='material' color='#111115' roughness={0.45} metalness={1} opacity={0.7} envMapIntensity={1} needsUpdate={true}/>
+        <mesh geometry={nodes.casephone.geometry}>
+          <meshStandardMaterial attach='material' color='#111115' roughness={0.45} metalness={1} opacity={0.7} envMapIntensity={1} />
           <mesh geometry={nodes.tela.geometry}>
-            <meshStandardMaterial attach='material' map={activeTexture} roughness={0.2} metalness={0.1} envMapIntensity={0.8} needsUpdate={true}/>
+            <meshStandardMaterial attach='material' map={activeTexture} roughness={0.2} metalness={0.1} envMapIntensity={0.8} />
           </mesh>
           <mesh geometry={nodes.detail.geometry}>
-            <meshStandardMaterial attach='material' color='#111115'/>
+            <meshStandardMaterial attach='material' color='#111115' />
           </mesh>
           <Marker position={[-3, 1.1, 0.2]}>
             <button className="pin-style" onClick={() => ChangeTexture(SetActiveTexture(gamification))}>
@@ -62,7 +64,7 @@ export default function Model(props) {
             </button>
           </Marker>
           <Marker position={[2.2, 0, 0.2]} >
-            <button className="pin-style" onClick={() => ChangeTexture(SetActiveTexture(home))}>
+            <button className="pin-style" onClick={() => ChangeTexture(SetActiveTexture(ranking))}>
               Ranking
             </button>
           </Marker>
@@ -76,14 +78,30 @@ export default function Model(props) {
               Loja
             </button>
           </Marker>
-          {/* <Torus args={[4, 0.03, 60, 60]} rotation={[Math.PI*1.5, 0, 0]} position={[0,0,0]}/> */}
-        </animated.mesh>
+          {/* <Torus args={[4, 0.03, 60, 60]} rotation={[Math.PI * 1.5, 0, 0]} position={[0, 0, 0]} /> */}
+        </mesh>
       </animated.group>
     );
   }
 
   return (
-      <FlippingPhone/> 
+    <group>
+      <Canvas colorManagement dpr={1, 2} camera={{ position: [0, 0, 0], fov: 60, far: 2000, }}>
+        <Stage contactShadow={false} shadows={false} environment="warehouse" intensity={0.2}>
+          <directionalLight color="#FF2847" position={[-5, -2.5, -2]} intensity={0.2} castShadow={false} />
+          <PresentationControls
+                snap={true}
+                config={{ mass: 4, tension: 150, friction: 15 }}>
+            <Float speed={2.5} rotationIntensity={1} floatIntensity={3}>
+              <FlippingPhone />
+            </Float>
+            </PresentationControls>
+        </Stage>
+        {/* <EffectComposer multisampling={16}>
+          <Bloom intensity={0.6} luminanceThreshold={0.8} luminanceSmoothing={0.5} kernelSize={5} />
+        </EffectComposer> */}
+      </Canvas>
+    </group>
   )
 }
 

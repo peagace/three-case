@@ -9,5 +9,4 @@ export default function CameraParallax () {
     const [vec] = useState(() => new THREE.Vector3())
     const { camera, mouse } = useThree()
     useFrame(() => camera.position.lerp(vec.set(mouse.x * -2, 1, 60), 0.05))
-    return <group/>
 }
